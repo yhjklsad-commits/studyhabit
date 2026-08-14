@@ -88,7 +88,32 @@
     padding: 10px 20px; border-radius: 999px; font-weight: 700;
   }
   .nav-cta:hover { background: #ec4899; }
-  @media (max-width: 860px) { .nav-links > a:not(.nav-cta), .nav-links .dd { display: none; } }
+  .hamburger {
+    display: none; background: none; border: none; cursor: pointer;
+    font-size: 1.5rem; line-height: 1; color: var(--navy-900); padding: 6px 8px; border-radius: 8px;
+  }
+  .hamburger:hover { background: var(--sky-50); }
+  @media (max-width: 860px) {
+    .hamburger { display: block; }
+    .nav-links {
+      display: none; position: absolute; top: 100%; left: 0; right: 0;
+      flex-direction: column; align-items: stretch; gap: 2px;
+      background: var(--white); border-bottom: 1px solid var(--line);
+      padding: 10px 16px 18px; box-shadow: 0 16px 30px rgba(11,31,58,0.12);
+      max-height: calc(100vh - 64px); overflow-y: auto;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links > a { padding: 12px 10px; }
+    .dd { width: 100%; }
+    .dd-trigger { width: 100%; justify-content: space-between; padding: 12px 10px; }
+    .dd-menu {
+      position: static; opacity: 1; visibility: visible; transform: none;
+      box-shadow: none; border: none; background: var(--sky-50); margin: 2px 0 6px;
+      display: none; min-width: 0;
+    }
+    .dd.open .dd-menu { display: block; }
+    .nav-cta { justify-content: center; margin-top: 8px; }
+  }
 
   /* ---------- Hero ---------- */
   .hero {
@@ -507,7 +532,8 @@
 <nav>
   <div class="nav-inner">
     <div class="logo">스터디<span>하빗</span></div>
-    <div class="nav-links">
+    <button class="hamburger" id="navToggle" aria-label="메뉴 열기" aria-expanded="false">☰</button>
+    <div class="nav-links" id="navLinks">
       <div class="dd">
         <button class="dd-trigger" aria-expanded="false">일대일 과외 <span class="arw">▼</span></button>
         <div class="dd-menu">
@@ -1668,6 +1694,39 @@
   document.querySelectorAll('.dd-menu a').forEach(a => {
     a.addEventListener('click', () => dds.forEach(d => d.classList.remove('open')));
   });
+
+  // ---------- 모바일 햄버거 메뉴 ----------
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = navLinks.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      navToggle.textContent = isOpen ? '✕' : '☰';
+    });
+    navLinks.querySelectorAll('a:not(.dd-item)').forEach(a => {
+      a.addEventListener('click', () => {
+        navLinks.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+        navToggle.textContent = '☰';
+      });
+    });
+    document.querySelectorAll('.dd-menu a').forEach(a => {
+      a.addEventListener('click', () => {
+        navLinks.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+        navToggle.textContent = '☰';
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!navLinks.contains(e.target) && e.target !== navToggle) {
+        navLinks.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+        navToggle.textContent = '☰';
+      }
+    });
+  }
 
   // ---------- 페이지 뷰 전환 (지역별 / 학교별) ----------
   const pageViews = document.querySelectorAll('.page-view');
